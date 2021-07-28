@@ -1,6 +1,12 @@
 # VaultLeaseWatcher
 Lease expiration watcher for [VaultSharp client](https://github.com/rajanadar/VaultSharp). Renews secrets' leases on time, retries multiple times on fail, gives all logging possibilities via events and checks lease expiration for non-renewable secrets;
 
+## Installation
+Available on [nuget][VaultLeaseWatcher.nuget]
+```bash
+PM> Install-Package VaultLeaseWatcher
+```
+
 # Getting started
 ```csharp
 using var leaseWatcher = new LeaseWatcher(); //don't forget to dispose a client
@@ -33,3 +39,5 @@ watcher.Start(watch, out IList<WarningException>? warnings);
 //stop watching lease anytime 
 watcher.Stop(dbCreds.LeaseId); 
 ```
+
+[VaultLeaseWatcher.nuget]: https://www.nuget.org/packages/VaultLeaseWatcher
