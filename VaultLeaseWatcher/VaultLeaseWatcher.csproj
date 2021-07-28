@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <LangVersion>8.0</LangVersion>
+    <Version>0.0.1</Version>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/Zelenov/VaultLeaseWatcher</PackageProjectUrl>
+    <Authors>Evgeny Zelenov</Authors>
+    <Description>Lease expiration watcher for HarshiCorp Vault and VaultSharp client. Renews secrets' leases on time, retries multiple times on fail, gives all logging possibilities via events and checks lease expiration for non-renewable secrets</Description>
+    <PackageTags>harshicorp, vault, vaultsharp, secrets, lease, watcher, background, expiration, renew</PackageTags>
+    <PackageLicenseExpression/>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>Evgeny Zelenov</Copyright>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DocumentationFile>VaultLeaseWatcher.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Polly" Version="7.0.1" />
+  </ItemGroup>
+
+</Project>
