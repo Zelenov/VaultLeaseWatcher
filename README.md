@@ -22,7 +22,7 @@ LeaseOptions options = new LeaseOptions
     SleepBetweenRetries = TimeSpan.FromSeconds(10), //wait 10 seconds beetween failed renew tries
     RetryCount = 10 //try to renew lease 10 times before failing
 };
-var renewLeaseFunc = lease => _client.V1.System.RenewLeaseAsync(lease.LeaseId, lease.LeaseDurationSeconds);
+var renewLeaseFunc = lease => vaultClient.V1.System.RenewLeaseAsync(lease.LeaseId, lease.LeaseDurationSeconds);
 var watch = new LeaseWatch {RenewLease = renewLeaseFunc, Lease = lease, Options = options};
 
 //start watch
