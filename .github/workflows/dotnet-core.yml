@@ -20,7 +20,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --no-build --verbosity normal
+      run: dotnet test --no-restore --no-build --configuration Release --verbosity normal
     - name: publish on version change
       id: publish_nuget
       uses: rohith/publish-nuget@v2
