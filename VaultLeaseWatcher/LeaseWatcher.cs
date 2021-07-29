@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Polly;
 using VaultLeaseWatcher.Exceptions;
 using VaultLeaseWatcher.Options;
 using VaultLeaseWatcher.Warnings;
@@ -71,8 +70,7 @@ namespace VaultLeaseWatcher
                 try
                 {
                     var leaseData1 = leaseData;
-                    // ReSharper disable once MethodSupportsCancellation
-                    Task.Run(() => job(leaseData1, leaseData1.CancellationToken));
+                    Task.Run(() => job(leaseData1, leaseData1.CancellationToken), leaseData1.CancellationToken);
                 }
                 catch
                 {
@@ -125,31 +123,22 @@ namespace VaultLeaseWatcher
         }
 
 
-        private IAsyncPolicy BuildPollyPolicy(LeaseOptions options)
+     
+        private SimplePolicy BuildPollyPolicy(LeaseOptions options)
         {
             var retryCount = options.RetryCount;
             var sleepBetweenRetries = options.SleepBetweenRetries ?? TimeSpan.Zero;
             var handleAssertion = new Func<Exception, bool>(ex => !(ex is LeaseNotFoundException));
+            var policy = SimplePolly.Handle(handleAssertion).WithRetry(OnRetry);
             if (retryCount >= 0)
-            {
-                if (sleepBetweenRetries <= TimeSpan.Zero)
-                    return Policy.Handle(handleAssertion)
-                       .RetryAsync(retryCount, (ex, rc, context) => OnRetry(ex, rc, TimeSpan.Zero, context));
+                policy.WithRetryCount(retryCount);
 
-                return Policy.Handle(handleAssertion)
-                   .WaitAndRetryAsync(retryCount, _ => sleepBetweenRetries,
-                        (ex, timeSpan, rc, context) => OnRetry(ex, rc, timeSpan, context));
-            }
-
-            if (sleepBetweenRetries <= TimeSpan.Zero)
-                return Policy.Handle(handleAssertion)
-                   .RetryForeverAsync((ex, rc, context) => OnRetry(ex, rc, TimeSpan.Zero, context));
-
-            return Policy.Handle(handleAssertion)
-               .WaitAndRetryForeverAsync((_, __, ___) => sleepBetweenRetries, OnRetry);
+            if (sleepBetweenRetries > TimeSpan.Zero)
+                policy.WithSleepDuration(sleepBetweenRetries);
+            return policy;
         }
 
-        private Task OnRetry(Exception ex, int retryCount, TimeSpan timeSpan, Context context)
+        private Task OnRetry(Exception ex, int retryCount, TimeSpan timeSpan, IDictionary<string, object> context)
         {
             var leaseData = (LeaseData) context["LeaseData"];
             OnRenewFailed(new LeaseWatcherRenewFailedContext
@@ -199,8 +188,8 @@ namespace VaultLeaseWatcher
                     {
                         OnRenewStarted(new RenewStartedContext {Lease = lease, RenewIn = wait, Options = options});
                         await Task.Delay(wait, cancellationToken);
-                        await policy.ExecuteAsync((ctx, token) => RenewLeaseAsync(leaseData),
-                            new Context("renew", new Dictionary<string, object> {{"LeaseData", leaseData}}),
+                        await policy.ExecuteAsync(ctx => RenewLeaseAsync((LeaseData)ctx["LeaseData"]),
+                            new Dictionary<string, object> {{"LeaseData", leaseData}},
                             cancellationToken);
                     }
                 }

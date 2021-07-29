@@ -7,7 +7,11 @@ namespace VaultLeaseWatcher
         public string LeaseId { get; set; }
         public bool Renewable { get; set; }
         public TimeSpan LeaseDuration { get; set; }
-        public int LeaseDurationSeconds => (int) LeaseDuration.TotalSeconds;
+        public int LeaseDurationSeconds
+        {
+            get => (int) LeaseDuration.TotalSeconds;
+            set => LeaseDuration = TimeSpan.FromSeconds(value);
+        }
 
         public string Key => LeaseId;
 
