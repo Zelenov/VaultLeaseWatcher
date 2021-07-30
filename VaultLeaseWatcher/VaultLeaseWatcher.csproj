@@ -3,7 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <LangVersion>8.0</LangVersion>
-    <Version>0.0.2</Version>
+    <Version>0.0.3.0</Version>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/Zelenov/VaultLeaseWatcher</PackageProjectUrl>

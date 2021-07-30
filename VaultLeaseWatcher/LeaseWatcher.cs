@@ -11,7 +11,7 @@ using VaultLeaseWatcher.Warnings;
 
 namespace VaultLeaseWatcher
 {
-    public class LeaseWatcher : ILeaseWatcher, IDisposable
+    public class LeaseWatcher : ILeaseWatcher
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -66,7 +66,7 @@ namespace VaultLeaseWatcher
 
             void RunBackgroundJob(Func<LeaseData, CancellationToken, Task> job)
             {
-                var leaseData = _leases.AddOrUpdate(lease.Key, AddValueFactory, UpdateValueFactory);
+                var leaseData = _leases.AddOrUpdate(lease.LeaseId, AddValueFactory, UpdateValueFactory);
                 try
                 {
                     var leaseData1 = leaseData;
@@ -108,7 +108,7 @@ namespace VaultLeaseWatcher
             var lease = leaseData.Lease;
             var options = leaseData.Options;
             var owner = leaseData.RenewDelegate;
-            if (!_leases.TryGetValue(lease.Key, out _))
+            if (!_leases.TryGetValue(lease.LeaseId, out _))
                 throw new LeaseNotFoundException($"Lease {lease} not found");
 
             OnRenewLease(new LeaseWatcherRenewContext {Lease = lease, Options = options, Tag = leaseData.Tag});
@@ -155,7 +155,8 @@ namespace VaultLeaseWatcher
 
         private static WatchType GetWatchType(Lease lease, LeaseOptions options, IList<WarningException> warnings)
         {
-            if (lease.LeaseDuration <= TimeSpan.Zero)
+
+            if (string.IsNullOrEmpty(lease.LeaseId) || lease.LeaseDuration <= TimeSpan.Zero)
                 return WatchType.None;
 
             if (!options.AutoRenew)
@@ -209,7 +210,7 @@ namespace VaultLeaseWatcher
             finally
             {
                 leaseData.Dispose();
-                _leases.TryRemove(lease.Key, out _);
+                _leases.TryRemove(lease.LeaseId, out _);
             }
         }
 
@@ -227,7 +228,7 @@ namespace VaultLeaseWatcher
                 await Task.Delay(wait, cancellationToken);
                 try
                 {
-                    if (!_leases.TryRemove(lease.Key, out _))
+                    if (!_leases.TryRemove(lease.LeaseId, out _))
                         return;
 
                     throw new LeaseWatcherLeaseEndedException($"Lease {lease.LeaseId} ended");
