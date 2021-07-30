@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 
 namespace VaultLeaseWatcher
 {
-    public interface ILeaseWatcher
+    public interface ILeaseWatcher: IDisposable
     {
         void Stop(string leaseId);
 
